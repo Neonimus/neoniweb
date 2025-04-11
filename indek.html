@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neoniweb</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: sans-serif; background: #0f0f0f; color: white; height: 100vh; display: flex; justify-content: center; align-items: center; }
+    .login, .dashboard { width: 100%; max-width: 400px; padding: 2rem; background: #1c1c1c; border-radius: 10px; display: none; flex-direction: column; gap: 1rem; }
+    .active { display: flex; }
+    input, button, textarea { padding: 0.7rem; border-radius: 6px; border: none; font-size: 1rem; }
+    button { background: #10b981; color: white; cursor: pointer; }
+    ul { list-style: none; margin-top: 1rem; }
+    li { margin-bottom: 0.5rem; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <div class="login active">
+    <h2>Login ke Neoniweb</h2>
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Masuk</button>
+    <p id="loginMsg"></p>
+  </div>
+
+  <div class="dashboard">
+    <h2>Neoniweb Dashboard</h2>
+    <input type="text" id="linkInput" placeholder="Tempel link di sini" />
+    <textarea id="docInput" rows="4" placeholder="Tulis dokumen..."></textarea>
+    <button onclick="saveData()">Simpan</button>
+    <h3>Link & Dokumen Tersimpan:</h3>
+    <ul id="savedList"></ul>
+  </div>
+
+  <script type="module">
+    // Konfigurasi Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqs_fL0o3O8VEHRr2GmYvhMdWvm-Z-X1g",
+      authDomain: "neoniweb.firebaseapp.com",
+      projectId: "neoniweb",
+      storageBucket: "neoniweb.appspot.com",
+      messagingSenderId: "224172317408",
+      appId: "1:224172317408:web:bc3a21c405be168cc01f26",
+      databaseURL: "https://neoniweb-default-rtdb.firebaseio.com/"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const dataRef = ref(db, "/neoniweb-data");
+
+    function login() {
+      const u = document.getElementById("username").value;
+      const p = document.getElementById("password").value;
+      if (u === "Neonimus" && p === "slima123") {
+        document.querySelector(".login").classList.remove("active");
+        document.querySelector(".dashboard").classList.add("active");
+      } else {
+        document.getElementById("loginMsg").innerText = "Username atau sandi salah.";
+      }
+    }
+
+    window.login = login;
+
+    function saveData() {
+      const link = document.getElementById("linkInput").value.trim();
+      const doc = document.getElementById("docInput").value.trim();
+      if (!link && !doc) return;
+      push(dataRef, { link, doc });
+      document.getElementById("linkInput").value = "";
+      document.getElementById("docInput").value = "";
+    }
+
+    onValue(dataRef, (snapshot) => {
+      const list = document.getElementById("savedList");
+      list.innerHTML = "";
+      snapshot.forEach(item => {
+        const data = item.val();
+        const li = document.createElement("li");
+        li.textContent = data.link || data.doc;
+        list.appendChild(li);
+      });
+    });
+  </script>
+</body>
+</html>
